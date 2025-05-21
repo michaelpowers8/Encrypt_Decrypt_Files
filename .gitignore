@@ -163,3 +163,5 @@ cython_debug/
 *.txt
 *.csv
 *.xls*
+Key_IV.json
+*.key
