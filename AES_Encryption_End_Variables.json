@@ -22,9 +22,15 @@
     },
     "data":[
         {
+            "Variable Name":"S_IREAD",
+            "Type":"int",
+            "Hash":"51e8ea280b44e16934d4d611901f3d3afc41789840acdff81942c2f65009cd52",
+            "Size (bytes)":28
+        },
+        {
             "Variable Name":"globals_dict",
             "Type":"dict",
-            "Hash":"d3ec3b78b7f25a9972a9bcf6a3782117d648dc524c26b636f2a3f437efd6caad",
+            "Hash":"73aa54ed0292ded1c7baf6771dc5368515cddbbf9731f3461ded2aef2bd5321e",
             "Size (bytes)":832
         }
     ]

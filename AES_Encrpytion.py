@@ -3,6 +3,7 @@ from Crypto.Util.Padding import pad, unpad
 from Crypto.Random import get_random_bytes
 from pandas import DataFrame
 import sys,hashlib,json,base64,os
+from stat import S_IREAD
 
 def get_variable_info():
     # Get the current global and local variables
@@ -45,13 +46,16 @@ def get_variable_info():
 
 def generate_key_iv() -> tuple[bytes,bytes]:
     """
-    Generate a random 32-byte AES key and 16-byte IV.
+    Generate a random 64-byte AES key and 16-byte IV.
     """
-    key:bytes = get_random_bytes(32)  # 32 bytes = 256-bit AES key
+    key:bytes = get_random_bytes(64)  # 32 bytes = 256-bit AES key
     iv:bytes = get_random_bytes(16)   # 16 bytes = block size for AES
     return key, iv
 
 def get_key_iv() -> tuple[bytes,bytes]:
+    try:
+        os.chmod("Key_IV.json",mode=S_IREAD)
+    except:pass
     try:
         with open("Key_IV.json","r") as file:
             data:dict[str,bytes] = json.load(file)
