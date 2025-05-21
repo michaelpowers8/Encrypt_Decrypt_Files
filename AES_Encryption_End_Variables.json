@@ -1,0 +1,31 @@
+{
+    "schema":{
+        "fields":[
+            {
+                "name":"Variable Name",
+                "type":"string"
+            },
+            {
+                "name":"Type",
+                "type":"string"
+            },
+            {
+                "name":"Hash",
+                "type":"string"
+            },
+            {
+                "name":"Size (bytes)",
+                "type":"integer"
+            }
+        ],
+        "pandas_version":"1.4.0"
+    },
+    "data":[
+        {
+            "Variable Name":"globals_dict",
+            "Type":"dict",
+            "Hash":"d3ec3b78b7f25a9972a9bcf6a3782117d648dc524c26b636f2a3f437efd6caad",
+            "Size (bytes)":832
+        }
+    ]
+}
