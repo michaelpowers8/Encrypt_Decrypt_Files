@@ -1,0 +1,37 @@
+{
+    "schema":{
+        "fields":[
+            {
+                "name":"Variable Name",
+                "type":"string"
+            },
+            {
+                "name":"Type",
+                "type":"string"
+            },
+            {
+                "name":"Hash",
+                "type":"string"
+            },
+            {
+                "name":"Size (bytes)",
+                "type":"integer"
+            }
+        ],
+        "pandas_version":"1.4.0"
+    },
+    "data":[
+        {
+            "Variable Name":"S_IREAD",
+            "Type":"int",
+            "Hash":"51e8ea280b44e16934d4d611901f3d3afc41789840acdff81942c2f65009cd52",
+            "Size (bytes)":28
+        },
+        {
+            "Variable Name":"globals_dict",
+            "Type":"dict",
+            "Hash":"2b84a0b5d3162865d89a3594efb032e0f93bff8d97c96b55b709457a267ee284",
+            "Size (bytes)":832
+        }
+    ]
+}

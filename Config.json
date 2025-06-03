@@ -1,4 +1,4 @@
 {
-    "Encrypt":true,
-    "Decrypt":false
+    "Encrypt":false,
+    "Decrypt":true
 }

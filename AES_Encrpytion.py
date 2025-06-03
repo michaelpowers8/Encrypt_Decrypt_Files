@@ -1,8 +1,7 @@
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
+import sys,hashlib,json,base64,os
+from pyAesCrypt import encryptStream,decryptStream
 from Crypto.Random import get_random_bytes
 from pandas import DataFrame
-import sys,hashlib,json,base64,os
 from stat import S_IREAD
 
 def get_variable_info():
@@ -71,70 +70,29 @@ def get_key_iv() -> tuple[bytes,bytes]:
             json.dump(data,file,indent=4)
     return key,iv
     
-def encrypt_file(input_file:str, output_file:str, key:bytes, iv:bytes) -> None:
-    """
-    Encrypt the contents of a file using AES encryption.
+def encrypt_file(file_path:str, password:str):
+    buffer_size = 64 * 1024  # 64KB buffer size
+    encrypted_file_path = file_path + ".aes"
 
-    Args:
-        input_file (str): Path to the input file.
-        output_file (str): Path to save the encrypted file.
-        key (bytes): AES key.
-        iv (bytes): Initialization vector.
-    """
-    try:
-        # Read the input file
-        with open(input_file, 'rb') as f:
-            data:bytes = f.read()
+    with open(file_path, "rb") as f_in:
+        with open(encrypted_file_path, "wb") as f_out:
+            encryptStream(f_in, f_out, password, buffer_size)
 
-        # Pad the data to be a multiple of the AES block size
-        padded_data:bytes = pad(data, AES.block_size)
+    # Optionally, remove the original file
+    os.remove(file_path)
+    
+def decrypt_file(encrypted_file_path:str, password:str):
+    buffer_size = 64 * 1024  # 64KB buffer size
+    decrypted_file_path = encrypted_file_path[:-4]  # Remove '.aes' extension
 
-        # Create a Cipher object for AES encryption
-        cipher = AES.new(key, AES.MODE_CBC, iv)
-
-        # Encrypt the data
-        encrypted_data:bytes = cipher.encrypt(padded_data)
-
-        # Write the encrypted data to the output file
-        with open(output_file, 'wb') as f:
-            f.write(encrypted_data)
-
-        print(f"File '{input_file}' encrypted to '{output_file}'.")
-        os.remove(input_file)
-    except:
-        pass
-
-def decrypt_file(input_file:str, output_file:str, key:bytes, iv:bytes):
-    """
-    Decrypt an AES-encrypted file.
-
-    Args:
-        input_file (str): Path to the encrypted file.
-        output_file (str): Path to save the decrypted file.
-        key (bytes): AES key.
-        iv (bytes): Initialization vector.
-    """
-    try:
-        # Read the encrypted file
-        with open(input_file, 'rb') as f:
-            encrypted_data = f.read()
-
-        # Create a Cipher object for AES decryption
-        cipher = AES.new(key, AES.MODE_CBC, iv)
-
-        # Decrypt the data
-        padded_data:bytes = cipher.decrypt(encrypted_data)
-
-        # Remove padding
-        data:bytes = unpad(padded_data, AES.block_size)
-
-        # Write the decrypted data to the output file
-        with open(output_file, 'wb') as f:
-            f.write(data)
-        print(f"File '{input_file}' decrypted to '{output_file}'.")
-        os.remove(input_file)
-    except:
-        pass
+    with open(encrypted_file_path, "rb") as f_in:
+        with open(decrypted_file_path, "wb") as f_out:
+            try:
+                decryptStream(f_in, f_out, password, buffer_size, os.path.getsize(encrypted_file_path))
+            except ValueError:
+                # Remove partially decrypted file if decryption failed
+                os.remove(decrypted_file_path)
+                print("Incorrect password!")
 
 def load_configuraton() -> tuple[bool,bool]:
     with open("Config.json",'r') as file:

@@ -88,7 +88,8 @@ def decrypt_all_non_coding_files_in_single_folder(full_path:str) -> None:
     try:
         all_files:list[str] = os.listdir(full_path)
         for current_file in all_files:
-            if((current_file.split(".")[-1].lower() in ['txt','doc','docx','xlsx','xls','xlsm','pptx','zip']) and (is_file(os.path.join(full_path,current_file)))):
+            if((current_file.split(".")[-1].lower() in ['aes','txt','doc','docx','xlsx','xls','xlsm','pptx','zip']) and (is_file(os.path.join(full_path,current_file)))):
+                print(current_file)
                 encrypted_contents:str = read_file(full_path,current_file)
                 original_contents:bytes = Fernet(get_master_key()).decrypt(encrypted_contents)
                 write_contents_to_file(full_path,current_file,original_contents)            
