@@ -11,7 +11,7 @@ from xml_logging import XML_Logger
 from pyAesCrypt import encryptStream, decryptStream
 
 LOGGER_BASEPATH = os.path.dirname(os.path.abspath(__file__))
-MASTER_PASSWORD_FILE = "Password_Data/Master_Password.secure"
+MASTER_PASSWORD_FILE = "C:/Code/Python/Encrypt_Decrypt_Files/Password_Data/Master_Password.secure"
 
 class Single_File_Encryptor:
     def __init__(self,master_password:str,password_storage_file:str,logger:XML_Logger,password_length=12,buffer_size=64*1024):
@@ -23,9 +23,24 @@ class Single_File_Encryptor:
         self.master_password_hash:str = self.hash_password(self.master_password)
         self.master_password_verified:bool = self._verify_master_password()
 
+    def _create_master_password_directory(self) -> None:
+        if "/" in MASTER_PASSWORD_FILE:
+            if not(os.path.isdir('/'.join(MASTER_PASSWORD_FILE.split("/")[:-1]))):
+                os.makedirs('/'.join(MASTER_PASSWORD_FILE.split("/")[:-1]))
+                return None
+            else:
+                return None
+        elif "\\" in MASTER_PASSWORD_FILE:
+            if not(os.path.isdir('\\'.join(MASTER_PASSWORD_FILE.split("\\")[:-1]))):
+                os.makedirs('\\'.join(MASTER_PASSWORD_FILE.split("\\")[:-1]))
+                return None
+            else:
+                return None
+        return None
+
     def _verify_master_password(self) -> bool:
+        self._create_master_password_directory()
         if not os.path.exists(MASTER_PASSWORD_FILE):
-            # First-time setup: Store the hash
             with open(MASTER_PASSWORD_FILE, 'w', encoding='utf-8') as file:
                 file.write(self.master_password_hash)
             os.system(f'icacls "{MASTER_PASSWORD_FILE}" /grant:r "%USERNAME%":R')
@@ -157,7 +172,10 @@ class Single_File_Encryptor:
             else:
                 data:dict[str,str] = {}
             data[encrypted_path] = password
-            os.remove(self.password_storage_file)
+            try:
+                os.remove(self.password_storage_file)
+            except:
+                pass
             with open(self.password_storage_file, "wb") as file:
                 file.write(json.dumps(data, indent=4).encode('utf-8'))  # Encode to bytes
             self._encrypt_data_file()
