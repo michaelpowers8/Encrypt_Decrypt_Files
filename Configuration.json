@@ -1,5 +1,5 @@
 {
-    "File_To_Encrypt":"C:/Code/Python/Encrypt_Decrypt_Files/Test/Test4.txt",
+    "File_To_Encrypt":"C:/Code/Python/Encrypt_Decrypt_Files/Test/Test.txt",
     "Minimum_Master_Password_Length": 10,
     "Password_Storage_File":"Password_Data/Passwords.json",
     "Buffer_Size":65536

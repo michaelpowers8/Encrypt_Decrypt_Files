@@ -1,9 +1,11 @@
 import os
 import json
+import time
 import string
 from typing import Any
 from xml_logging import XML_Logger
 from encryptor import Single_File_Encryptor,MASTER_PASSWORD_FILE
+from decryptor import Single_File_Decryptor
 
 LOGGER_BASEPATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -92,8 +94,16 @@ def main():
                 password_length=1000,
                 buffer_size=configuration["Buffer_Size"]
             )
+    decryptor:Single_File_Decryptor = Single_File_Decryptor(
+                master_password=password,
+                password_storage_file=configuration["Password_Storage_File"],
+                logger=logger,
+                buffer_size=configuration["Buffer_Size"]
+            )
     if(valid_file_to_encrypt(configuration["File_To_Encrypt"])):
         encryptor.encrypt_file(configuration["File_To_Encrypt"])
+        time.sleep(3)
+    decryptor.decrypt_file(f"{configuration['File_To_Encrypt']}.aes")
     logger.save_variable_info(globals_dict=globals(),locals_dict=locals(),variable_save_path="Encrypt_Files_Variables.json") 
 
 if __name__ == "__main__":

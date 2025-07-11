@@ -8,16 +8,15 @@ import secrets
 import hashlib
 import traceback
 from xml_logging import XML_Logger
+from encryptor import MASTER_PASSWORD_FILE
 from pyAesCrypt import encryptStream, decryptStream
 
 LOGGER_BASEPATH = os.path.dirname(os.path.abspath(__file__))
-MASTER_PASSWORD_FILE = "Password_Data/Master_Password.secure"
 
-class Single_File_Encryptor:
-    def __init__(self,master_password:str,password_storage_file:str,logger:XML_Logger,password_length=12,buffer_size=64*1024):
+class Single_File_Decryptor:
+    def __init__(self,master_password:str,password_storage_file:str,logger:XML_Logger,buffer_size=64*1024):
         self.master_password:str = master_password
-        self.password_storage_file:str = password_storage_file 
-        self.password_length:int = password_length
+        self.password_storage_file:str = password_storage_file
         self.logger:XML_Logger = logger
         self.buffer_size = buffer_size
         self.master_password_hash:str = self.hash_password(self.master_password)
@@ -25,13 +24,7 @@ class Single_File_Encryptor:
 
     def _verify_master_password(self) -> bool:
         if not os.path.exists(MASTER_PASSWORD_FILE):
-            # First-time setup: Store the hash
-            with open(MASTER_PASSWORD_FILE, 'w', encoding='utf-8') as file:
-                file.write(self.master_password_hash)
-            os.system(f'icacls "{MASTER_PASSWORD_FILE}" /grant:r "%USERNAME%":R')
-            os.chmod(MASTER_PASSWORD_FILE, stat.S_IREAD)
-            os.system(f'attrib +h "{MASTER_PASSWORD_FILE}"')
-            return True
+            return False # No password, therefore, no file has been encrypted, therefore, no master password saved
         
         # Read stored hash and verify
         with open(MASTER_PASSWORD_FILE, 'r', encoding='utf-8') as file:
@@ -156,7 +149,14 @@ class Single_File_Encryptor:
                     data = {}
             else:
                 data:dict[str,str] = {}
-            data[encrypted_path] = password
+            try:
+                data.pop(encrypted_path)
+            except Exception as e:
+                self.logger.log_to_xml(
+                        message=f"Failed to remove password from {self.password_storage_file}.",
+                        basepath=self.logger.base_dir,
+                        status="WARNING"
+                    )
             os.remove(self.password_storage_file)
             with open(self.password_storage_file, "wb") as file:
                 file.write(json.dumps(data, indent=4).encode('utf-8'))  # Encode to bytes
@@ -166,7 +166,7 @@ class Single_File_Encryptor:
             self.logger.log_to_xml(message=f"Failed to save encryption data for {encrypted_path} using password hash {self.hash_password(password)}. Official error: {traceback.format_exc()}",basepath=self.logger.base_dir,status="ERROR")
             return traceback.format_exc()
 
-    def encrypt_file(self, file_path:str) -> bool:
+    def decrypt_file(self, file_path:str) -> bool:
         """Encrypt a file with AES-256"""
         valid_extensions:list[str] = ['txt','xml','pptx','py','json','eml','java','pdf','xls','xlsx','xlsm','cs','js','cpp','config','md','dll','exe']
         if(not(self.master_password_verified)):
@@ -176,20 +176,24 @@ class Single_File_Encryptor:
             return False
         if(
             (not(isinstance(file_path,str)))or 
-            (not(len(file_path.split('.'))>1))or 
-            (not(file_path.split('.')[-1].lower() in valid_extensions))or
+            (not(len(file_path.split('.'))>2))or 
+            (not(file_path.split('.')[-2].lower() in valid_extensions))or
             (not(isinstance(self.password_storage_file,str)))or
-            (not(self.master_password_verified))
+            (not(self.master_password_verified))or
+            (not(file_path.split('.')[-1].lower() == 'aes'))
           ):
-            error_message:str = f"Encryption failed for {file_path}. Invalid parameters passed. Master password must match records, file path to encrypt must be of type {valid_extensions}. File path passed: {file_path}"
+            error_message:str = f"Decryption failed for {file_path}. Invalid parameters passed. File path to decrypt must be of type {valid_extensions}. Actual file must be .aes type. File path passed: {file_path}"
             self.logger.log_to_xml(message=error_message,basepath=self.logger.base_dir,status="ERROR")
             return False
         try:
-            encrypted_path = f"{file_path}.aes"
-            password:str = self.generate_strong_password(length=self.password_length)
-            with open(file_path, 'rb') as f_in, open(encrypted_path, 'wb') as f_out:
-                encryptStream(f_in, f_out, password, self.buffer_size)
-            save_status:bool|str = self.save_encryption_data(encrypted_path,password)
+            decrypted_path:str = file_path[:-4]
+            self._decrypt_data_file()
+            with open(self.password_storage_file,'rb') as file:
+                all_passwords:dict[str,str] = json.load(file)
+            password:str = all_passwords[file_path]
+            with open(file_path, 'rb') as f_in, open(decrypted_path, 'wb') as f_out:
+                decryptStream(f_in, f_out, password, self.buffer_size)
+            save_status:bool|str = self.save_encryption_data(file_path,password)
             if isinstance(save_status,str):
                 raise RuntimeError(save_status)
             os.remove(file_path) # Only remove original file if original file is encrypted AND password is properly saved
