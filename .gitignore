@@ -167,3 +167,4 @@ Key_IV.json
 *.key
 *.aes
 *.AES
+*.secure
