@@ -47,7 +47,7 @@ def get_master_password(min_password_length:int) -> str:
     return password
 
 def _verify_configuration(configuration:dict[str,Any]) -> bool:
-    required_keys:list[str] = ["File_To_Encrypt","Minimum_Master_Password_Length","Password_Storage_File","Buffer_Size"]
+    required_keys:list[str] = ["File_To_Encrypt","Minimum_Master_Password_Length","Password_Storage_File","Buffer_Size","Master_Password_File"]
     missing_keys:list[str] = []
 
     for key in required_keys:
