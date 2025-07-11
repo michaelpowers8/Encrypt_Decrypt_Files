@@ -11,7 +11,7 @@ from xml_logging import XML_Logger
 from pyAesCrypt import encryptStream, decryptStream
 
 LOGGER_BASEPATH = os.path.dirname(os.path.abspath(__file__))
-MASTER_PASSWORD_FILE = "Master_Password.secure"
+MASTER_PASSWORD_FILE = "Password_Data/Master_Password.secure"
 
 class Single_File_Encryptor:
     def __init__(self,master_password:str,password_storage_file:str,logger:XML_Logger,password_length=12,buffer_size=64*1024):
