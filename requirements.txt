@@ -1,0 +1,10 @@
+# Encryption/Decryption Dependencies
+cryptography==42.0.5          # Modern cryptography library with AES support
+pycryptodome==3.20.0          # Additional crypto primitives (backup/alternative)
+argon2-cffi==23.1.0           # For secure password hashing (optional but recommended)
+
+# Standard Library Backports (not strictly needed for Python 3.11.9)
+typing-extensions==4.11.0     # For type hints compatibility
+
+# Development/Testing
+pytest==8.1.1                 # For running tests (optional)
